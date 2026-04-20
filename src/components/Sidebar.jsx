@@ -1,10 +1,18 @@
 import { useState } from 'react'
-import { Link, useLocation } from 'react-router-dom'
+import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, ChevronDown, Menu, X } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const [expandedReports, setExpandedReports] = useState(true)
   const location = useLocation()
+  const navigate = useNavigate()
+  const { logout } = useAuth()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/login')
+  }
   
   const menuItems = [
     { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '#' },
@@ -129,7 +137,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
           <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
           <span className="text-sm font-semibold">Settings</span>
         </button>
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-900/10 transition-all">
+        <button
+          onClick={handleLogout}
+          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-900/10 transition-all"
+        >
           <LogOut className="w-5 h-5" />
           <span className="text-sm font-semibold">Logout</span>
         </button>
