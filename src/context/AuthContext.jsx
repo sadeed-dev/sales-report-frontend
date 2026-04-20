@@ -8,7 +8,7 @@ export function AuthProvider({ children }) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'insights.startupflora.com/api/v1'
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'https://insights.startupflora.co/api/v1'
 
   // Check if user is already logged in on mount
   useEffect(() => {
