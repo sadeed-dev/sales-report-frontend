@@ -10,6 +10,9 @@ export default function CombinedCallLogsReport() {
   const [selectedBranch, setSelectedBranch] = useState('all')
   const [isExportingExcel, setIsExportingExcel] = useState(false)
   const [isExportingImage, setIsExportingImage] = useState(false)
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+console.log(apiUrl);
+
 
     const { data, isLoading, error } = useCombinedCallLogs(params)
 // Loader overlay when API is loading
@@ -52,7 +55,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
     const handleExportImage = async () => {
       setIsExportingImage(true)
       try {
-        let url = `http://localhost:3008/api/v1/reports/combined/call-logs?format=image`
+        let url = `${apiUrl}/reports/combined/call-logs?format=image`
         if (fromDate) url += `&from_date=${fromDate}`
         if (toDate) url += `&to_date=${toDate}`
         if (selectedBranch && selectedBranch !== 'all') url += `&branch=${selectedBranch}`
@@ -83,7 +86,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
     const handleExportExcel = async () => {
       setIsExportingExcel(true)
       try {
-        let url = `http://localhost:3008/api/v1/reports/combined/call-logs?format=xlsx`
+        let url = `${apiUrl}/reports/combined/call-logs?format=xlsx`
         if (fromDate) url += `&from_date=${fromDate}`
         if (toDate) url += `&to_date=${toDate}`
         if (selectedBranch && selectedBranch !== 'all') url += `&branch=${selectedBranch}`

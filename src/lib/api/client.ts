@@ -1,7 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 
 // API Configuration (use import.meta.env for Vite)
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3008/api/v1';
+const API_BASE_URL = 'https://insights.startupflora.co/api/v1';
 
 console.log('🔧 API_BASE_URL initialized:', API_BASE_URL);
 

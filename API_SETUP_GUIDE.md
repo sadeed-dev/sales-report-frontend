@@ -164,7 +164,7 @@ Modify in `components/providers/QueryProvider.tsx`
 ### ❌ **Backend API Not Connecting**
 - Check backend is running: `npm run dev` in `sales-dashboard-backend`
 - Verify port 3008 is open
-- Check `.env.local`: `VITE_API_URL=http://localhost:3008/api/v1`
+- Check `.env.local`: `VITE_API_BASE_URL=http://localhost:3008/api/v1`
 
 ### ❌ **No Data Showing**
 - Ensure valid date range exists in backend

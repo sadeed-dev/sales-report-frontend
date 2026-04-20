@@ -12,6 +12,8 @@ export default function TataCallLogsReport() {
   const [isExportingImage, setIsExportingImage] = useState(false)
 
   const { data, isLoading, error } = useTataCallLogs(params)
+const apiUrl = import.meta.env.VITE_API_BASE_URL;
+console.log("🔧 apiUrl initialized:", apiUrl);
 
   const callLogs = (data?.data?.summary || []).map((row) => ({
   ...row,
@@ -59,7 +61,7 @@ export default function TataCallLogsReport() {
   const handleExportImage = async () => {
     setIsExportingImage(true)
     try {
-      let url = `http://localhost:3008/api/v1/reports/tata/call-logs?format=image`
+      let url = `${apiUrl}/reports/tata/call-logs?format=image`
       if (fromDate) url += `&from_date=${fromDate}`
       if (toDate) url += `&to_date=${toDate}`
       if (selectedBranch && selectedBranch !== 'all') url += `&branch=${selectedBranch}`
@@ -90,7 +92,7 @@ export default function TataCallLogsReport() {
   const handleExportExcel = async () => {
     setIsExportingExcel(true)
     try {
-      let url = `http://localhost:3008/api/v1/reports/tata/call-logs?format=xlsx`
+      let url = `${apiUrl}/reports/tata/call-logs?format=xlsx`
       if (fromDate) url += `&from_date=${fromDate}`
       if (toDate) url += `&to_date=${toDate}`
       if (selectedBranch && selectedBranch !== 'all') url += `&branch=${selectedBranch}`
