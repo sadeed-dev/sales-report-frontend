@@ -60,7 +60,7 @@ export default function Sidebar({ isOpen, setIsOpen }) {
             <span className="text-white font-bold text-sm">VI</span>
           </div>
           <div className="flex-1">
-            <h1 className="font-bold text-white text-sm leading-tight">VI Analytics</h1>
+            <h1 className="font-bold text-white text-sm leading-tight">Sales Analytics</h1>
             <p className="text-xs text-slate-400">Sales Manager</p>
           </div>
         </div>
