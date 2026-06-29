@@ -21,11 +21,11 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
   total_calls: Number(row.total_calls) || 0,
   connected_calls: Number(row.connected_calls) || 0,
   not_connected_calls: Number(row.not_connected_calls) || 0,
-  tata_talk_time_sec: Number(row.tata_talk_time_sec) || 0,
+  dialshree_talk_time_sec: Number(row.dialshree_talk_time_sec ?? row.tata_talk_time_sec) || 0,
   vi_talk_time_sec: Number(row.vi_talk_time_sec) || 0,
   total_talk_time_sec: Number(row.total_talk_time_sec) || 0,
   avg_talk_time_sec: Number(row.avg_talk_time_sec) || 0,
-  tata_talk_time: row.tata_talk_time || "00:00:00",
+  dialshree_talk_time: row.dialshree_talk_time || row.tata_talk_time || "00:00:00",
   vi_talk_time: row.vi_talk_time || "00:00:00",
   total_talk_time: row.total_talk_time || "00:00:00",
   avg_talk_time: row.avg_talk_time || "00:00:00",
@@ -253,17 +253,17 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
 <table className="w-full">
   <thead>
     <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50/30">
-      <SortHeader label="Sr #" sortKey="sr_no" />
-      <SortHeader label="Salesman" sortKey="user_name" />
+      <SortHeader label="S.R." sortKey="sr_no" />
+      <SortHeader label="Name" sortKey="user_name" />
       <SortHeader label="Mobile" sortKey="phone_number" />
       <SortHeader label="Branch" sortKey="branch" />
       <SortHeader label="Total Calls" sortKey="total_calls" />
       <SortHeader label="Connected" sortKey="connected_calls" />
       <SortHeader label="Not Connected" sortKey="not_connected_calls" />
-      <SortHeader label="Tata Talk Time" sortKey="tata_talk_time_sec" />
-      <SortHeader label="VI Talk Time" sortKey="vi_talk_time_sec" />
-      <SortHeader label="Total Talk Time" sortKey="total_talk_time_sec" />
-      <SortHeader label="Avg Talk Time" sortKey="avg_talk_time" />
+      <SortHeader label="Dialshree Dur." sortKey="dialshree_talk_time_sec" />
+      <SortHeader label="VI Dur" sortKey="vi_talk_time_sec" />
+      <SortHeader label="Total Dur" sortKey="total_talk_time_sec" />
+      <SortHeader label="Avg Dur" sortKey="avg_talk_time" />
       {/* <SortHeader label="Talktime %" sortKey="talktimePercent" /> */}
     </tr>
   </thead>
@@ -322,7 +322,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
           </td>
 
           <td className={`px-6 py-4 text-sm font-mono font-semibold ${isLowTalkTime ? 'text-red-900' : 'text-slate-900'}`}>
-            {row.tata_talk_time || "00:00:00"}
+            {row.dialshree_talk_time || "00:00:00"}
           </td>
 
           <td className={`px-6 py-4 text-sm font-mono font-semibold ${isLowTalkTime ? 'text-red-900' : 'text-slate-900'}`}>
