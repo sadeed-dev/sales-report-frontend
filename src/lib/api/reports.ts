@@ -175,6 +175,16 @@ const reportAPI = {
     });
     return response;
   },
+
+  // Get absent users images - department-wise
+  getAbsentUsersDepartmentwiseImages: async (params?: CallLogsParams) => {
+    const response = await apiClient.get<any>('/reports/attendance/absent-users-departmentwise', {
+      params,
+      responseType: 'blob',
+      timeout: 120000,
+    });
+    return response;
+  },
 };
 
 export default reportAPI;
