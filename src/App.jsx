@@ -8,6 +8,7 @@ import TataPage from './pages/TataPage'
 import VIPage from './pages/VIPage'
 import CombinedPage from './pages/CombinedPage'
 import DispositionPage from './pages/DispositionPage'
+import LeadListDispositionPage from './pages/LeadListDispositionPage'
 import { QueryProvider } from './components/dashboard/providers/QueryProvider'
 import UsersModule from './pages/users/user'
 
@@ -64,6 +65,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <DispositionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/lead-lists"
+              element={
+                <ProtectedRoute>
+                  <LeadListDispositionPage />
                 </ProtectedRoute>
               }
             />

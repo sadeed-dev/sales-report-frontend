@@ -87,8 +87,78 @@ export interface CallLogEntry {
   talktime_percentage?: number;
 }
 
+export interface LeadListReportParams {
+  from_date?: string;
+  to_date?: string;
+  min_calls?: number;
+}
+
+export interface LeadListDispositionRow {
+  key: string;
+  label: string;
+  isPercent: boolean;
+  values: Record<string, number>;
+  grand_total: number;
+}
+
+export interface LeadListDispositionCategory {
+  key: string;
+  label: string;
+  icon: string;
+  rows: LeadListDispositionRow[];
+}
+
+export interface LeadListTopPerformer {
+  list_name: string;
+  total_interested_pct: number;
+  total_interested: number;
+  grand_total: number;
+}
+
+export interface LeadListHighlight {
+  list_name: string;
+  grand_total?: number;
+  total_interested?: number;
+}
+
+export interface LeadListDispositionResponse {
+  status: string;
+  meta: {
+    from_date: string;
+    to_date: string;
+    min_calls_threshold: number;
+    generated_at: string;
+  };
+  data: {
+    summary: {
+      total_calls: number;
+      interested: number;
+      sec_300_plus: number;
+      total_interested: number;
+      overall_conversion_pct: number;
+    };
+    lead_lists: string[];
+    top_performing_lists: LeadListTopPerformer[];
+    highlights: {
+      highest_volume: LeadListHighlight | null;
+      highest_total_interested: LeadListHighlight | null;
+    };
+    categories: LeadListDispositionCategory[];
+    grand_total_row: LeadListDispositionRow | null;
+  };
+}
+
 // Reports API endpoints
 const reportAPI = {
+  // Get Lead List Performance & Disposition Report
+  getLeadListDispositionReport: async (params?: LeadListReportParams) => {
+    const response = await apiClient.get<LeadListDispositionResponse>(
+      '/reports/dispositions/lead-lists',
+      { params }
+    );
+    return response.data;
+  },
+
   // Get TATA call logs
   getTataCallLogs: async (params?: CallLogsParams) => {
     console.log('📡 getTataCallLogs called with:', params);
