@@ -67,6 +67,13 @@ const ROW_META = {
 
 
 const NAVY = 'bg-[#1e3a6b]'
+// Fixed width for every lead-list / Grand Total column, so every column
+// stays the same size — long list names wrap onto a second line inside the
+// header instead of stretching their column wider. Used together with
+// `table-fixed` on the <table> itself, which is what actually makes the
+// browser respect these widths instead of shrinking to fit content.
+const COL_WIDTH = 'w-[80px]'
+const LABEL_COL_WIDTH = 'w-28'
 
 function buildFlatRows(categories) {
   const byKey = new Map()
@@ -125,7 +132,7 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
         width: 'max-content',
         fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
       }}
-      className="bg-white p-8"
+      className="bg-white p-4"
     >
       {/* Header */}
       <div className="flex items-start justify-between gap-10 mb-6">
@@ -151,33 +158,38 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
 
       {/* Stat cards */}
       <div className="grid grid-cols-5 gap-4 mb-6">
-        <StatCard icon={Phone} label="Total Calls" value={formatNumber(totalCalls)} />
-        <StatCard icon={Users} label="Interested" value={formatNumber(interested)} />
-        <StatCard icon={Timer} label="300 Sec+" value={formatNumber(sec300Plus)} />
-        <StatCard icon={Target} label="Total Interested" value={formatNumber(totalInterestedCount)} />
-        <div className="rounded-xl border border-blue-200 bg-blue-50 p-5 flex flex-col justify-center">
-          <span className="text-[11px] font-semibold tracking-wide text-blue-700 uppercase">Overall Conversion</span>
-          <span className="mt-1 text-2xl font-bold text-blue-700">{formatPercent(conversionRate)}</span>
+        <StatCard icon={Phone} color="violet" label="Total Calls" value={formatNumber(totalCalls)} />
+        <StatCard icon={Users} color="emerald" label="Interested" value={formatNumber(interested)} />
+        <StatCard icon={Timer} color="sky" label="300 Sec+" value={formatNumber(sec300Plus)} />
+        <StatCard icon={Target} color="amber" label="Total Interested" value={formatNumber(totalInterestedCount)} />
+        <div className="rounded-xl border border-slate-200 bg-white p-5 flex flex-col justify-center">
+          <span className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">
+            Overall Conversion
+          </span>
+
+          <span className="mt-1 text-2xl font-bold text-teal-700">
+            {formatPercent(conversionRate)}
+          </span>
         </div>
       </div>
 
       {/* Table */}
       <div className="rounded-xl border border-slate-200 overflow-hidden">
-        <table className="border-collapse" style={{ borderSpacing: 0 }}>
+        <table className="table-fixed border-collapse" style={{ borderSpacing: 0 }}>
           <thead>
             <tr>
-              <th className={`${NAVY} text-white text-left text-xs font-semibold uppercase tracking-wide px-2 py-3 border border-[#2c4e85] whitespace-nowrap`}>
+              <th className={`${NAVY} ${LABEL_COL_WIDTH} text-white text-left text-xs font-semibold uppercase tracking-wide px-2 py-3 border border-[#2c4e85] whitespace-nowrap`}>
                 Disposition
               </th>
               {leadLists.map((name) => (
                 <th
                   key={name}
-                  className={`${NAVY} text-white text-center text-xs font-bold uppercase tracking-wide px-2 py-3 border border-[#2c4e85] whitespace-nowrap`}
+                  className={`${NAVY} ${COL_WIDTH} text-white text-center text-xs font-bold uppercase tracking-wide px-2 py-3 border border-[#2c4e85] leading-tight break-words`}
                 >
                   {name}
                 </th>
               ))}
-              <th className={`${NAVY} text-white text-center text-xs font-semibold uppercase tracking-wide px-2 py-3 border border-[#2c4e85] whitespace-nowrap`}>
+              <th className={`${NAVY} ${COL_WIDTH} text-white text-center text-xs font-semibold uppercase tracking-wide px-2 py-3 border border-[#2c4e85] whitespace-nowrap`}>
                 Grand Total
               </th>
             </tr>
@@ -198,7 +210,7 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
 
               return (
                 <tr key={row.key} className={rowBg}>
-                  <td className="px-2 py-3 border border-slate-200 whitespace-nowrap">
+                  <td className={`${LABEL_COL_WIDTH} px-2 py-3 border border-slate-200 whitespace-nowrap`}>
                     <div className="flex items-center gap-1">
                       <Icon className={`h-4 w-4 shrink-0 ${palette.icon}`} />
                       <span className={`text-sm ${labelWeight} whitespace-nowrap ${palette.label}`}>{row.label}</span>
@@ -207,12 +219,12 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
                   {leadLists.map((name) => (
                     <td
                       key={name}
-                      className={`px-2 py-3 text-center text-sm ${valueWeight} border border-slate-200 whitespace-nowrap ${valueColor}`}
+                      className={`${COL_WIDTH} px-2 py-3 text-center text-sm ${valueWeight} border border-slate-200 whitespace-nowrap ${valueColor}`}
                     >
                       {formatNumber(row.values[name])}
                     </td>
                   ))}
-                  <td className={`px-2 py-3 text-center text-sm ${totalWeight} border border-slate-200 whitespace-nowrap ${totalColor}`}>
+                  <td className={`${COL_WIDTH} px-2 py-3 text-center text-sm ${totalWeight} border border-slate-200 whitespace-nowrap ${totalColor}`}>
                     {formatNumber(row.grand_total)}
                   </td>
                 </tr>
@@ -220,19 +232,19 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
             })}
 
             {grandTotalRow && (
-              <tr className="bg-indigo-900">
-                <td className="px-2 py-3 text-sm font-bold text-white border border-indigo-700 whitespace-nowrap">
+              <tr className="bg-teal-800">
+                <td className={`${LABEL_COL_WIDTH} px-2 py-3 text-sm font-bold text-white border border-teal-600 whitespace-nowrap`}>
                   Grand Total
                 </td>
                 {leadLists.map((name) => (
                   <td
                     key={name}
-                    className="px-2 py-3 text-center text-sm font-bold text-white border border-indigo-700 whitespace-nowrap"
+                    className={`${COL_WIDTH} px-2 py-3 text-center text-sm font-bold text-white border border-teal-600 whitespace-nowrap`}
                   >
                     {formatNumber(grandTotalRow.values[name])}
                   </td>
                 ))}
-                <td className="px-2 py-3 text-center text-sm font-bold text-white border border-indigo-700 whitespace-nowrap">
+                <td className={`${COL_WIDTH} px-2 py-3 text-center text-sm font-bold text-white border border-teal-600 whitespace-nowrap`}>
                   {formatNumber(grandTotalRow.grand_total)}
                 </td>
               </tr>
@@ -240,18 +252,18 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
 
             {totalInterested && (
               <tr className={NAVY}>
-                <td className="px-2 py-3 text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap">
+                <td className={`${LABEL_COL_WIDTH} px-2 py-3 text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap`}>
                   Total Interested
                 </td>
                 {leadLists.map((name) => (
                   <td
                     key={name}
-                    className="px-2 py-3 text-center text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap"
+                    className={`${COL_WIDTH} px-2 py-3 text-center text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap`}
                   >
                     {formatNumber(totalInterested.values[name])}
                   </td>
                 ))}
-                <td className="px-2 py-3 text-center text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap">
+                <td className={`${COL_WIDTH} px-2 py-3 text-center text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap`}>
                   {formatNumber(totalInterested.grand_total)}
                 </td>
               </tr>
@@ -259,18 +271,18 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
 
             {totalInterestedPct && (
               <tr className={NAVY}>
-                <td className="px-2 py-3 text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap">
+                <td className={`${LABEL_COL_WIDTH} px-2 py-3 text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap`}>
                   Total Interested %
                 </td>
                 {leadLists.map((name) => (
                   <td
                     key={name}
-                    className="px-2 py-3 text-center text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap"
+                    className={`${COL_WIDTH} px-2 py-3 text-center text-sm font-bold text-white border border-[#2c4e85] whitespace-nowrap`}
                   >
                     {formatPercent(totalInterestedPct.values[name])}
                   </td>
                 ))}
-                <td className="px-2 py-3 text-center text-sm font-bold text-orange-400 border border-[#2c4e85] whitespace-nowrap">
+                <td className={`${COL_WIDTH} px-2 py-3 text-center text-sm font-bold text-orange-400 border border-[#2c4e85] whitespace-nowrap`}>
                   {formatPercent(totalInterestedPct.grand_total)}
                 </td>
               </tr>
@@ -292,15 +304,23 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
   )
 })
 
-function StatCard({ icon: Icon, label, value }) {
+const STAT_COLOR_MAP = {
+  violet: { bg: 'bg-violet-50', icon: 'text-violet-600', value: 'text-violet-600' },
+  emerald: { bg: 'bg-emerald-50', icon: 'text-emerald-600', value: 'text-emerald-600' },
+  sky: { bg: 'bg-sky-50', icon: 'text-sky-600', value: 'text-sky-600' },
+  amber: { bg: 'bg-amber-50', icon: 'text-amber-600', value: 'text-amber-600' },
+}
+
+function StatCard({ icon: Icon, label, value, color = 'violet' }) {
+  const palette = STAT_COLOR_MAP[color] || STAT_COLOR_MAP.violet
   return (
     <div className="rounded-xl border border-slate-200 bg-white p-5 flex items-center gap-4 whitespace-nowrap">
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-blue-50">
-        <Icon className="h-5 w-5 text-blue-600" />
+      <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full ${palette.bg}`}>
+        <Icon className={`h-5 w-5 ${palette.icon}`} />
       </div>
       <div>
         <div className="text-[11px] font-semibold tracking-wide text-slate-500 uppercase">{label}</div>
-        <div className="text-2xl font-bold text-slate-900 mt-0.5">{value}</div>
+        <div className={`text-2xl font-bold mt-0.5 ${palette.value}`}>{value}</div>
       </div>
     </div>
   )
