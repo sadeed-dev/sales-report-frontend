@@ -137,9 +137,9 @@ const LeadListDispositionExportTable = forwardRef(function LeadListDispositionEx
             <div className="text-2xl font-bold text-slate-800 whitespace-nowrap">
               Lead List Performance &amp; Disposition Report
             </div>
-            <div className="text-sm text-slate-500 mt-0.5 whitespace-nowrap">
+            {/* <div className="text-sm text-slate-500 mt-0.5 whitespace-nowrap">
               Track and analyze lead performance across different dispositions
-            </div>
+            </div> */}
           </div>
         </div>
         <div className="flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2.5 whitespace-nowrap">
