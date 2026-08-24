@@ -212,7 +212,7 @@ export default function LeadListDispositionReport() {
       ) : (
         <>
           {/* Top performers */}
-          <div className="rounded-xl border border-slate-200 bg-white p-5 md:p-6 shadow-sm">
+          {/* <div className="rounded-xl border border-slate-200 bg-white p-5 md:p-6 shadow-sm">
             <div className="flex items-center gap-2 mb-5">
               <Trophy className="h-5 w-5 text-amber-500" />
               <h2 className="text-base font-bold text-slate-900">
@@ -256,7 +256,7 @@ export default function LeadListDispositionReport() {
                 />
               </div>
             </div>
-          </div>
+          </div> */}
 
           {/* Disposition table */}
           <div className="rounded-xl border border-slate-200 bg-white shadow-sm overflow-hidden">
