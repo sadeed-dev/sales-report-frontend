@@ -93,6 +93,29 @@ export interface LeadListReportParams {
   min_calls?: number;
 }
 
+export interface InboundCallReportParams {
+  from_date?: string;
+  to_date?: string;
+}
+
+export interface InboundCallSummaryRow {
+  virtual_key: string;
+  ivr_type: string;
+  total_unique_customers: number;
+  answered: number;
+  missed: number;
+}
+
+export interface InboundMissedCallRow {
+  unique_id: string;
+  call_time: string | null;
+  customer_number: string | null;
+  ivr_type: string;
+  agent_1: string | null;
+  agent_2: string | null;
+  agent_3: string | null;
+}
+
 export interface LeadListDispositionRow {
   key: string;
   label: string;
@@ -156,6 +179,16 @@ const reportAPI = {
       '/reports/dispositions/lead-lists',
       { params }
     );
+    return response.data;
+  },
+
+  getInboundCallSummary: async (params?: InboundCallReportParams) => {
+    const response = await apiClient.get('/reports/inbound-calls/summary', { params });
+    return response.data;
+  },
+
+  getInboundMissedCalls: async (params?: InboundCallReportParams) => {
+    const response = await apiClient.get('/reports/inbound-calls/missed', { params });
     return response.data;
   },
 

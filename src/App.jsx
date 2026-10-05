@@ -11,6 +11,7 @@ import DispositionPage from './pages/DispositionPage'
 import LeadListDispositionPage from './pages/LeadListDispositionPage'
 import { QueryProvider } from './components/dashboard/providers/QueryProvider'
 import UsersModule from './pages/users/user'
+import InboundCallsPage from './pages/InboundCallsPage'
 
 function AppContent() {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false)
@@ -73,6 +74,14 @@ function AppContent() {
               element={
                 <ProtectedRoute>
                   <LeadListDispositionPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/inbound-calls"
+              element={
+                <ProtectedRoute>
+                  <InboundCallsPage />
                 </ProtectedRoute>
               }
             />

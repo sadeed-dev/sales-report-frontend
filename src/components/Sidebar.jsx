@@ -28,9 +28,10 @@ export default function Sidebar({ isOpen, setIsOpen }) {
     { id: 'combined', label: 'Combined Call Logs', icon: '📈', href: '/combined' },
     { id: 'disposition', label: 'Agent Wise Disposition', icon: '👥', href: '/disposition' },
     { id: 'lead-lists', label: 'Lead List Performance', icon: '🏆', href: '/lead-lists' },
+    { id: 'inbound-calls', label: 'Website Inbound Calls', icon: '☎️', href: '/inbound-calls' },
   ]
 
-  const isReportsActive = ['/tata', '/vi', '/combined', '/disposition', '/lead-lists'].includes(location.pathname)
+  const isReportsActive = ['/tata', '/vi', '/combined', '/disposition', '/lead-lists', '/inbound-calls'].includes(location.pathname)
   const activeMenu = location.pathname === '/users' ? 'users' : isReportsActive ? 'reports' : null
 
   return (
