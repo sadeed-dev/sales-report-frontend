@@ -56,19 +56,19 @@ function renderAgentDetail(value) {
   return (
     <>
       {value.slice(0, separatorIndex)}
-      <span className="font-normal text-rose-600">{` - ${value.slice(separatorIndex + 3)}`}</span>
+      <span className="ml-1 inline-block rounded-md bg-[#f9eded] px-1.5 py-0.5 text-xs font-medium text-[#a34456]">{` - ${value.slice(separatorIndex + 3)}`}</span>
     </>
   )
 }
 
 function MetricCard({ icon: Icon, label, value, accent }) {
   return (
-    <div className="group rounded-xl border border-slate-200/80 bg-white px-3 py-2.5 text-center shadow-[0_8px_24px_-18px_rgba(15,23,42,0.4)] transition duration-200 hover:-translate-y-0.5 hover:shadow-lg">
-      <div className={`mx-auto flex h-8 w-8 items-center justify-center rounded-xl ${accent}`}>
-        <Icon className="h-4 w-4" strokeWidth={2.25} />
+    <div className="group relative overflow-hidden rounded-2xl border border-slate-200/70 bg-white p-4 text-left shadow-[0_6px_20px_-12px_rgba(15,23,42,0.18)] transition duration-200 hover:-translate-y-0.5 hover:shadow-lg md:p-5">
+      <div className={`mb-4 flex h-10 w-10 items-center justify-center rounded-2xl ${accent}`}>
+        <Icon className="h-5 w-5" strokeWidth={1.8} />
       </div>
-      <p className="mt-1.5 text-[10px] font-semibold uppercase tracking-[0.07em] text-slate-500">{label}</p>
-      <p className="mt-0.5 text-2xl font-bold leading-tight tracking-tight text-slate-900">{value}</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.1em] text-slate-500">{label}</p>
+      <p className="mt-2 text-3xl font-semibold leading-tight tracking-tight text-[#142c38] tabular-nums md:text-4xl">{value}</p>
     </div>
   )
 }
@@ -102,6 +102,7 @@ export default function InboundCallsReport() {
         to_date: appliedRange.to,
       }),
     ])
+    
       .then(([summaryResponse, missedResponse]) => {
         if (!isCurrent) return
         setSummaryRows(summaryResponse.data?.summary || [])
@@ -179,7 +180,7 @@ export default function InboundCallsReport() {
 
   return (
     <div className="mx-auto max-w-[1240px] space-y-4">
-      <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-[#111638] via-[#25225d] to-[#163b63] px-5 py-4 text-center shadow-[0_24px_60px_-30px_rgba(30,41,99,0.75)] md:px-8 md:py-5">
+      <header className="relative overflow-hidden rounded-[1.5rem] bg-gradient-to-br from-[#102a36] via-[#173d49] to-[#24565b] px-5 py-4 text-center shadow-[0_24px_60px_-30px_rgba(30,41,99,0.75)] md:px-8 md:py-5">
         <div className="pointer-events-none absolute -right-12 -top-32 h-80 w-80 rounded-full border border-cyan-100/10" />
         <div className="pointer-events-none absolute -left-16 -bottom-48 h-96 w-96 rounded-full border border-violet-100/10" />
         <div className="relative mx-auto flex max-w-3xl flex-col items-center gap-2.5">
@@ -213,7 +214,7 @@ export default function InboundCallsReport() {
             value={fromDate}
             max={toDate || undefined}
             onChange={(event) => setFromDate(event.target.value)}
-            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
           />
         </label>
         <label className="grid gap-1.5 text-xs font-semibold text-slate-600">
@@ -223,14 +224,14 @@ export default function InboundCallsReport() {
             value={toDate}
             min={fromDate || undefined}
             onChange={(event) => setToDate(event.target.value)}
-            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-violet-400 focus:ring-4 focus:ring-violet-100"
+            className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-sm text-slate-800 outline-none transition focus:border-teal-500 focus:ring-4 focus:ring-teal-100"
           />
         </label>
         <button
           type="button"
           onClick={applyFilters}
           disabled={isLoading}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-900/15 transition hover:from-indigo-700 hover:to-violet-700 disabled:cursor-wait disabled:opacity-60"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#206052] to-[#287566] px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-900/15 transition hover:from-[#184c42] hover:to-[#206052] disabled:cursor-wait disabled:opacity-60"
         >
           {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <RefreshCw className="h-4 w-4" />}
           Apply filters
@@ -239,7 +240,7 @@ export default function InboundCallsReport() {
           type="button"
           onClick={downloadReport}
           disabled={isLoading || isExporting || !hasReportData}
-          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#151a3d] to-[#34306e] px-4 py-2.5 text-sm font-semibold text-white shadow-md shadow-indigo-950/20 transition hover:from-[#202653] hover:to-[#45408a] disabled:cursor-not-allowed disabled:opacity-50"
+          className="inline-flex items-center gap-2 rounded-xl bg-gradient-to-r from-[#142c38] to-[#24505a] px-4 py-3.5 text-sm font-semibold text-white shadow-md shadow-indigo-950/20 transition hover:from-[#1b3c49] hover:to-[#2c606b] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {isExporting ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
           {isExporting ? 'Creating PNG…' : 'Download PNG'}
@@ -260,20 +261,18 @@ export default function InboundCallsReport() {
       ) : (
         <section
           ref={reportRef}
-          className="space-y-4 rounded-[1.5rem] border border-slate-200/80 bg-gradient-to-b from-white via-white to-[#f5f7ff] p-4 shadow-[0_24px_70px_-48px_rgba(30,41,99,0.55)] md:space-y-5 md:p-5"
+          className="space-y-4 rounded-[1.5rem] border border-[#dce5e8] bg-[#f5f8f9] p-4 shadow-[0_24px_70px_-48px_rgba(20,44,56,0.4)] md:space-y-5 md:p-6"
         >
-          <div className="border-b border-slate-200 pb-4 text-center">
+          <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#102a36] via-[#173d49] to-[#24565b] px-5 py-6 text-center md:py-8">
             <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1">
-              <span className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-[0.18em] text-indigo-600">
-              <span className="h-2 w-2 rounded-full bg-teal-400" />
-              Website inbound calls
-              <span className="h-2 w-2 rounded-full bg-violet-400" />
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl border border-[#d8bd84]/30 bg-[#d8bd84]/10 text-[#e5cb98]">
+                <Phone className="h-4 w-4" strokeWidth={1.8} />
               </span>
-              <h2 className="text-xl font-bold tracking-tight text-slate-900 md:text-2xl">
-              Inbound performance overview
+              <h2 className="text-xl font-semibold tracking-tight text-white md:text-2xl">
+              Website inbound calls
               </h2>
             </div>
-            <div className="mt-1.5 flex flex-wrap items-center justify-center gap-x-2 gap-y-1 text-xs text-slate-500">
+            <div className="mt-3 flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-[#c1d3da]">
               <span>
               {formatDate(appliedRange.from)} – {formatDate(appliedRange.to)}
               </span>
@@ -281,52 +280,52 @@ export default function InboundCallsReport() {
               <span>Customer reach, call outcomes and missed-call follow-up</span>
               <span className="hidden text-slate-300 md:inline">·</span>
               <span className="inline-flex items-center gap-1.5">
-                <CalendarDays className="h-3 w-3 text-indigo-500" />
+                <CalendarDays className="h-3 w-3 text-[#e5cb98]" />
               Generated {new Date().toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
               </span>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-2.5 xl:grid-cols-4">
-            <MetricCard icon={Users} label="Unique customers" value={totals.total.toLocaleString()} accent="bg-indigo-50 text-indigo-600" />
-            <MetricCard icon={Check} label={`Answered · ${answeredRate}%`} value={totals.answered.toLocaleString()} accent="bg-teal-50 text-teal-700" />
-            <MetricCard icon={PhoneMissed} label={`Missed customers · ${missedRate}%`} value={totals.missed.toLocaleString()} accent="bg-rose-50 text-rose-600" />
-            <MetricCard icon={Phone} label="Missed call attempts" value={missedRows.length.toLocaleString()} accent="bg-amber-50 text-amber-600" />
+          <div className="grid grid-cols-2 gap-3 lg:grid-cols-4">
+            <MetricCard icon={Users} label="Unique customers" value={totals.total.toLocaleString()} accent="bg-[#eaf0f5] text-[#365b78]" />
+            <MetricCard icon={Check} label={`Answered · ${answeredRate}%`} value={totals.answered.toLocaleString()} accent="bg-[#e6f3ed] text-[#24725c]" />
+            <MetricCard icon={PhoneMissed} label={`Missed customers · ${missedRate}%`} value={totals.missed.toLocaleString()} accent="bg-[#f9eded] text-[#b35060]" />
+            <MetricCard icon={Phone} label="Missed call attempts" value={missedRows.length.toLocaleString()} accent="bg-[#f8f1e4] text-[#9b763b]" />
           </div>
 
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-slate-100 bg-gradient-to-r from-indigo-50/80 via-white to-violet-50/80 px-4 py-2 text-center md:px-5">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-slate-100 bg-gradient-to-r from-[#edf4f3] via-[#f8faf9] to-[#f4f6f4] px-4 py-3.5 text-center md:px-5">
               <h3 className="whitespace-nowrap text-sm font-bold text-slate-900">Daily call summary</h3>
               <span className="hidden text-slate-300 sm:inline">·</span>
               <p className="text-xs text-slate-500">Unique callers by website inbound number</p>
-              <span className="inline-flex rounded-full bg-indigo-100/80 px-3 py-1 text-xs font-semibold text-indigo-700">
+              <span className="inline-flex rounded-full bg-[#dcece7] px-3 py-1 text-xs font-semibold text-[#286452]">
                 {summary.length} inbound numbers
               </span>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full min-w-[620px] text-center">
                 <thead>
-                  <tr className="bg-gradient-to-r from-[#171b42] via-[#28265e] to-[#1d3b60] text-xs uppercase tracking-wider text-indigo-50">
-                    <th className="px-4 py-2.5 font-semibold">Inbound number</th>
-                  <th className="px-4 py-2.5 font-semibold">Unique customers</th>
-                  <th className="px-4 py-2.5 font-semibold">Answered</th>
-                  <th className="px-4 py-2.5 font-semibold">Missed</th>
+                  <tr className="bg-[#193c47] text-[10px] uppercase tracking-[0.1em] text-[#e1ecef]">
+                    <th className="px-4 py-3.5 font-semibold">Inbound number</th>
+                  <th className="px-4 py-3.5 font-semibold">Unique customers</th>
+                  <th className="px-4 py-3.5 font-semibold">Answered</th>
+                  <th className="px-4 py-3.5 font-semibold">Missed</th>
                   </tr>
                 </thead>
                 <tbody>
                   {summary.map((row, index) => (
-                    <tr key={row.ivr_type} className={`border-b border-slate-100 last:border-0 ${index % 2 ? 'bg-slate-50/70' : 'bg-white'}`}>
-                      <td className="px-4 py-2.5 text-sm font-semibold text-slate-800">{row.ivr_type}</td>
-                      <td className="px-4 py-2.5 text-sm font-bold text-slate-800">{row.total_unique_customers.toLocaleString()}</td>
-                      <td className="px-4 py-2.5 text-sm font-semibold text-teal-700">{row.answered.toLocaleString()}</td>
-                      <td className="px-4 py-2.5 text-sm font-semibold text-rose-700">{row.missed.toLocaleString()}</td>
+                    <tr key={row.ivr_type} className={`border-b border-slate-100 last:border-0 ${index % 2 ? 'bg-[#f7f9fa]' : 'bg-white'}`}>
+                      <td className="px-4 py-3.5 text-sm font-semibold text-slate-800">{row.ivr_type}</td>
+                      <td className="px-4 py-3.5 text-sm font-bold text-slate-800">{row.total_unique_customers.toLocaleString()}</td>
+                      <td className="px-4 py-3.5 text-sm font-semibold text-teal-700">{row.answered.toLocaleString()}</td>
+                      <td className="px-4 py-3.5 text-sm font-semibold text-rose-700">{row.missed.toLocaleString()}</td>
                     </tr>
                   ))}
-                  <tr className="bg-gradient-to-r from-indigo-50 to-violet-50">
-                    <td className="px-4 py-2.5 text-sm font-bold text-slate-900">Total</td>
-                    <td className="px-4 py-2.5 text-sm font-bold text-slate-900">{totals.total.toLocaleString()}</td>
-                    <td className="px-4 py-2.5 text-sm font-bold text-teal-700">{totals.answered.toLocaleString()}</td>
-                    <td className="px-4 py-2.5 text-sm font-bold text-rose-700">{totals.missed.toLocaleString()}</td>
+                  <tr className="bg-gradient-to-r from-[#e8f1ef] to-[#eff5f3]">
+                    <td className="px-4 py-3.5 text-sm font-bold text-slate-900">Total</td>
+                    <td className="px-4 py-3.5 text-sm font-bold text-slate-900">{totals.total.toLocaleString()}</td>
+                    <td className="px-4 py-3.5 text-sm font-bold text-teal-700">{totals.answered.toLocaleString()}</td>
+                    <td className="px-4 py-3.5 text-sm font-bold text-rose-700">{totals.missed.toLocaleString()}</td>
                   </tr>
                 </tbody>
               </table>
@@ -337,11 +336,11 @@ export default function InboundCallsReport() {
           </section>
 
           <section className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
-            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-slate-100 bg-gradient-to-r from-rose-50/70 via-white to-amber-50/70 px-4 py-2 text-center md:px-5">
+            <div className="flex flex-wrap items-center justify-center gap-x-3 gap-y-1 border-b border-slate-100 bg-gradient-to-r from-[#fbf5ed] via-[#fdfaf6] to-[#f9f4ec] px-4 py-3.5 text-center md:px-5">
               <h3 className="whitespace-nowrap text-sm font-bold text-slate-900">Missed call follow-up</h3>
               <span className="hidden text-slate-300 sm:inline">·</span>
               <p className="text-xs text-slate-500">Customer calls not answered by the assigned agents</p>
-              <span className="inline-flex rounded-full bg-rose-100 px-3 py-1 text-xs font-semibold text-rose-700">
+              <span className="inline-flex rounded-full bg-[#f5e3e6] px-3 py-1 text-xs font-semibold text-[#a34456]">
                 {missedRows.length.toLocaleString()} missed calls
               </span>
             </div>
@@ -359,23 +358,23 @@ export default function InboundCallsReport() {
               <div className="overflow-x-auto">
                 <table className="w-full min-w-[1050px] text-center">
                   <thead>
-                    <tr className="bg-gradient-to-r from-[#171b42] via-[#28265e] to-[#1d3b60] text-xs uppercase tracking-wider text-indigo-50">
-                      <th className="px-4 py-2.5 font-semibold">Call time</th>
-                      <th className="px-4 py-2.5 font-semibold">Customer number</th>
-                      <th className="px-4 py-2.5 font-semibold">Inbound number</th>
-                      <th className="px-4 py-2.5 font-semibold">Agent 1</th>
-                      <th className="px-4 py-2.5 font-semibold">Agent 2</th>
-                      <th className="px-4 py-2.5 font-semibold">Agent 3</th>
+                    <tr className="bg-[#193c47] text-[10px] uppercase tracking-[0.1em] text-[#e1ecef]">
+                      <th className="px-4 py-3.5 font-semibold">Call time</th>
+                      <th className="px-4 py-3.5 font-semibold">Customer number</th>
+                      <th className="px-4 py-3.5 font-semibold">Inbound number</th>
+                      <th className="px-4 py-3.5 font-semibold">Agent 1</th>
+                      <th className="px-4 py-3.5 font-semibold">Agent 2</th>
+                      <th className="px-4 py-3.5 font-semibold">Agent 3</th>
                     </tr>
                   </thead>
                   <tbody>
                     {missedRows.map((row, index) => (
-                      <tr key={row.unique_id} className={`border-b border-slate-100 last:border-0 ${index % 2 ? 'bg-slate-50/70' : 'bg-white'}`}>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-sm font-medium text-slate-700">{formatCallTime(row.call_time)}</td>
-                        <td className="whitespace-nowrap px-4 py-2.5 text-sm font-bold text-slate-900">{row.customer_number || '—'}</td>
-                        <td className="px-4 py-2.5 text-sm font-semibold text-slate-700">{row.ivr_type}</td>
+                      <tr key={row.unique_id} className={`border-b border-slate-100 last:border-0 ${index % 2 ? 'bg-[#f7f9fa]' : 'bg-white'}`}>
+                        <td className="whitespace-nowrap px-4 py-3.5 text-sm font-medium text-slate-700">{formatCallTime(row.call_time)}</td>
+                        <td className="whitespace-nowrap px-4 py-3.5 text-sm font-bold text-slate-900">{row.customer_number || '—'}</td>
+                        <td className="px-4 py-3.5 text-sm font-semibold text-slate-700">{row.ivr_type}</td>
                         {[row.agent_1, row.agent_2, row.agent_3].map((agent, agentIndex) => (
-                          <td key={`${row.unique_id}-agent-${agentIndex}`} className="px-4 py-2.5 text-sm text-slate-600">
+                          <td key={`${row.unique_id}-agent-${agentIndex}`} className="px-4 py-3.5 text-sm text-slate-600">
                             {renderAgentDetail(agent)}
                           </td>
                         ))}
