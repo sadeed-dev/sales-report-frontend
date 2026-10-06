@@ -157,9 +157,45 @@ export default function InboundCallsReport() {
   const downloadReport = async () => {
     if (!reportRef.current || isExporting) return
     setIsExporting(true)
+    let exportContainer
     try {
+      // Render a full-width copy so viewport scrollbars never enter the PNG.
+      const exportReport = reportRef.current.cloneNode(true)
+      exportContainer = document.createElement('div')
+      exportContainer.setAttribute('aria-hidden', 'true')
+      Object.assign(exportContainer.style, {
+        position: 'fixed',
+        left: '-100000px',
+        top: '0',
+        width: '1240px',
+        pointerEvents: 'none',
+      })
+      Object.assign(exportReport.style, {
+        width: '100%',
+        maxWidth: 'none',
+        height: 'auto',
+        maxHeight: 'none',
+      })
+      exportReport.querySelectorAll('.overflow-x-auto').forEach((wrapper) => {
+        Object.assign(wrapper.style, {
+          overflow: 'visible',
+          height: 'auto',
+          maxHeight: 'none',
+        })
+        wrapper.scrollLeft = 0
+        wrapper.scrollTop = 0
+      })
+      exportContainer.appendChild(exportReport)
+      document.body.appendChild(exportContainer)
+      await document.fonts.ready
+      // Allow wider table content to fit without clipping any agent columns.
+      const extraWidth = Math.max(0, ...Array.from(
+        exportReport.querySelectorAll('.overflow-x-auto'),
+        (wrapper) => wrapper.scrollWidth - wrapper.clientWidth
+      ))
+      exportContainer.style.width = `${1240 + extraWidth}px`
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      const image = await toPng(reportRef.current, {
+      const image = await toPng(exportReport, {
         pixelRatio: 2,
         backgroundColor: '#ffffff',
         cacheBust: true,
@@ -174,6 +210,7 @@ export default function InboundCallsReport() {
       console.error('Inbound call report image export failed:', exportError)
       window.alert('Could not create the PNG report. Please try again.')
     } finally {
+      exportContainer?.remove()
       setIsExporting(false)
     }
   }
