@@ -8,6 +8,7 @@ export interface CallLogsParams {
   to?: string;
   talktime_threshold?: number;
   branch?: string;
+  department?: 'hr' | 'operations' | 'hr-operations';
 }
 
 export interface EmployeeRecord {

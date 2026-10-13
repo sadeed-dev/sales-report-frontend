@@ -8,6 +8,7 @@ export default function CombinedCallLogsReport() {
   const [fromDate, setFromDate] = useState('')
   const [toDate, setToDate] = useState('')
   const [selectedBranch, setSelectedBranch] = useState('all')
+  const [selectedDepartment, setSelectedDepartment] = useState('all')
   const [isExportingExcel, setIsExportingExcel] = useState(false)
   const [isExportingImage, setIsExportingImage] = useState(false)
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
@@ -48,6 +49,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
       if (fromDate) newParams.from_date = fromDate
       if (toDate) newParams.to_date = toDate
       if (selectedBranch && selectedBranch !== 'all') newParams.branch = selectedBranch
+      if (selectedDepartment !== 'all') newParams.department = selectedDepartment
       setParams(Object.keys(newParams).length > 0 ? newParams : undefined)
     }
 
@@ -56,9 +58,10 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
       setIsExportingImage(true)
       try {
         let url = `${apiUrl}/reports/combined/call-logs?format=image`
+        if (selectedDepartment !== 'all') url += `&department=${selectedDepartment}`
         if (fromDate) url += `&from_date=${fromDate}`
         if (toDate) url += `&to_date=${toDate}`
-        if (selectedBranch && selectedBranch !== 'all') url += `&branch=${selectedBranch}`
+        if (selectedBranch && selectedBranch !== 'all') url += `&branch=${encodeURIComponent(selectedBranch)}`
         
         const response = await fetch(url, { method: 'POST' })
 
@@ -70,7 +73,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
         const url2 = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url2
-        a.download = `combined-call-logs-${new Date().toISOString().split('T')[0]}.zip`
+        a.download = `${selectedDepartment === 'all' ? 'combined-call-logs' : `${selectedDepartment}-talktime`}-${new Date().toISOString().split('T')[0]}.zip`
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url2)
@@ -87,9 +90,10 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
       setIsExportingExcel(true)
       try {
         let url = `${apiUrl}/reports/combined/call-logs?format=xlsx`
+        if (selectedDepartment !== 'all') url += `&department=${selectedDepartment}`
         if (fromDate) url += `&from_date=${fromDate}`
         if (toDate) url += `&to_date=${toDate}`
-        if (selectedBranch && selectedBranch !== 'all') url += `&branch=${selectedBranch}`
+        if (selectedBranch && selectedBranch !== 'all') url += `&branch=${encodeURIComponent(selectedBranch)}`
         
         const response = await fetch(url, { method: 'POST' })
 
@@ -101,7 +105,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
         const url2 = window.URL.createObjectURL(blob)
         const a = document.createElement('a')
         a.href = url2
-        a.download = `combined-call-logs-${new Date().toISOString().split('T')[0]}.xlsx`
+        a.download = `${selectedDepartment === 'all' ? 'combined-call-logs' : `${selectedDepartment}-talktime`}-${new Date().toISOString().split('T')[0]}.xlsx`
         document.body.appendChild(a)
         a.click()
         window.URL.revokeObjectURL(url2)
@@ -167,6 +171,20 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-20 px-6 py-4 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-slate-200 shadow-sm">
         <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <label htmlFor="talktime-department" className="text-sm font-semibold text-slate-700">Report:</label>
+            <select
+              id="talktime-department"
+              value={selectedDepartment}
+              onChange={(event) => setSelectedDepartment(event.target.value)}
+              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+            >
+              <option value="all">Combined Call Logs</option>
+              <option value="hr-operations">HR + Operations Talktime Reports</option>
+              <option value="hr">HR Talktime Report</option>
+              <option value="operations">Operations Talktime Report</option>
+            </select>
+          </div>
           <div className="flex items-center gap-2">
             <label className="text-sm font-semibold text-slate-700">From Date:</label>
             <input
