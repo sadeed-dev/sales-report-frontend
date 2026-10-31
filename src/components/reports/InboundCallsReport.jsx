@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState } from 'react'
-import { toPng } from 'html-to-image'
+import { renderReportPng } from '../../lib/reportImage'
 import {
   CalendarDays,
   Check,
@@ -201,17 +201,14 @@ export default function InboundCallsReport() {
       ))
       exportContainer.style.width = `${1240 + extraWidth}px`
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
-      const image = await toPng(exportReport, {
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        cacheBust: true,
-      })
+      const image = URL.createObjectURL(await renderReportPng(exportReport))
       const link = document.createElement('a')
       link.download = `website-inbound-report-${appliedRange.from}-to-${appliedRange.to}.png`
       link.href = image
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      setTimeout(() => URL.revokeObjectURL(image), 1000)
     } catch (exportError) {
       console.error('Inbound call report image export failed:', exportError)
       window.alert('Could not create the PNG report. Please try again.')

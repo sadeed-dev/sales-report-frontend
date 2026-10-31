@@ -4,11 +4,11 @@ import { AuthProvider, useAuth } from './context/AuthContext'
 import Sidebar from './components/Sidebar'
 import ProtectedRoute from './components/ProtectedRoute'
 import LoginPage from './pages/LoginPage'
-import TataPage from './pages/TataPage'
 import VIPage from './pages/VIPage'
 import CombinedPage from './pages/CombinedPage'
 import DispositionPage from './pages/DispositionPage'
 import LeadListDispositionPage from './pages/LeadListDispositionPage'
+import CampaignDispositionReport from './components/reports/CampaignDispositionReport'
 import { QueryProvider } from './components/dashboard/providers/QueryProvider'
 import UsersModule from './pages/users/user'
 import InboundCallsPage from './pages/InboundCallsPage'
@@ -29,19 +29,19 @@ function AppContent() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-blue-50">
+    <div className="min-h-screen bg-[#f5f7fb]">
       {user && <Sidebar isOpen={mobileSidebarOpen} setIsOpen={setMobileSidebarOpen} />}
       
       <div className={user ? 'lg:ml-64' : ''}>
         <div className={user ? 'pt-16 lg:pt-0' : ''}>
           <Routes>
             <Route path="/login" element={<LoginPage />} />
-            <Route path="/" element={user ? <Navigate to="/tata" replace /> : <Navigate to="/login" replace />} />
+            <Route path="/" element={user ? <Navigate to="/combined" replace /> : <Navigate to="/login" replace />} />
             <Route
               path="/tata"
               element={
                 <ProtectedRoute>
-                  <TataPage />
+                  <Navigate to="/combined" replace />
                 </ProtectedRoute>
               }
             />
@@ -85,6 +85,7 @@ function AppContent() {
                 </ProtectedRoute>
               }
             />
+            <Route path="/campaigns" element={<ProtectedRoute><CampaignDispositionReport /></ProtectedRoute>} />
             <Route
               path="/users"
               element={

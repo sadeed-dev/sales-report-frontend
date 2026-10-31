@@ -1,153 +1,65 @@
-import { useState } from 'react'
+﻿import { useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, ChevronDown, Menu, X } from 'lucide-react'
+import { LayoutDashboard, FileText, Users, BarChart3, Settings, LogOut, ChevronDown, Menu, X, Phone, Layers, ListChecks, Trophy, PhoneIncoming } from 'lucide-react'
 import { useAuth } from '../context/AuthContext'
+
+const reportItems = [
+  { label: 'VI Call Logs', icon: Phone, href: '/vi' },
+  { label: 'Combined Call Logs', icon: Layers, href: '/combined' },
+  { label: 'Agent Wise Disposition', icon: ListChecks, href: '/disposition' },
+  { label: 'Lead List Performance', icon: Trophy, href: '/lead-lists' },
+  { label: 'Campaign Wise Disposition', icon: BarChart3, href: '/campaigns' },
+  { label: 'Website Inbound Calls', icon: PhoneIncoming, href: '/inbound-calls' },
+]
 
 export default function Sidebar({ isOpen, setIsOpen }) {
   const [expandedReports, setExpandedReports] = useState(true)
-  const location = useLocation()
+  const { pathname } = useLocation()
   const navigate = useNavigate()
   const { logout } = useAuth()
+  const isReportsActive = reportItems.some((item) => item.href === pathname)
 
   const handleLogout = () => {
     logout()
     navigate('/login')
   }
-  
-  const menuItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard, href: '#' },
-    { id: 'teams', label: 'Teams Performance', icon: Users, href: '#' },
-    { id: 'reports', label: 'Reports', icon: FileText, href: '#', hasSubmenu: true },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '#' },
-    { id: 'users', label: 'Users', icon: Users, href: '/users' },
-  ]
-
-  const reportSubItems = [
-    { id: 'tata', label: 'Tata Call Logs', icon: '📊', href: '/tata' },
-    { id: 'vi', label: 'VI Call Logs', icon: '📱', href: '/vi' },
-    { id: 'combined', label: 'Combined Call Logs', icon: '📈', href: '/combined' },
-    { id: 'disposition', label: 'Agent Wise Disposition', icon: '👥', href: '/disposition' },
-    { id: 'lead-lists', label: 'Lead List Performance', icon: '🏆', href: '/lead-lists' },
-    { id: 'inbound-calls', label: 'Website Inbound Calls', icon: '☎️', href: '/inbound-calls' },
-  ]
-
-  const isReportsActive = ['/tata', '/vi', '/combined', '/disposition', '/lead-lists', '/inbound-calls'].includes(location.pathname)
-  const activeMenu = location.pathname === '/users' ? 'users' : isReportsActive ? 'reports' : null
 
   return (
     <>
-      <button
-        type="button"
-        onClick={() => setIsOpen(true)}
-        className="lg:hidden fixed top-3 left-3 z-50 inline-flex items-center justify-center rounded-lg bg-slate-900 text-white p-2 shadow-lg"
-        aria-label="Open sidebar"
-      >
-        <Menu className="w-5 h-5" />
+      <button type="button" onClick={() => setIsOpen(true)} className="sidebar-mobile-toggle lg:hidden" aria-label="Open navigation" aria-expanded={isOpen} aria-controls="main-sidebar">
+        <Menu size={20} />
       </button>
-
-      {isOpen && (
-        <button
-          type="button"
-          aria-label="Close sidebar overlay"
-          onClick={() => setIsOpen(false)}
-          className="lg:hidden fixed inset-0 z-40 bg-slate-950/50"
-        />
-      )}
-
-      <div className={`w-64 bg-gradient-to-b from-slate-900 to-slate-950 border-r border-slate-800/50 h-screen flex flex-col fixed left-0 top-0 z-50 transform transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-      {/* Logo Section */}
-      <div className="p-6 border-b border-slate-800/50 bg-gradient-to-r from-slate-900/50 to-transparent flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-500 to-cyan-500 flex items-center justify-center shadow-lg shadow-blue-500/30">
-            <span className="text-white font-bold text-sm">VI</span>
-          </div>
-          <div className="flex-1">
-            <h1 className="font-bold text-white text-sm leading-tight">Sales Analytics</h1>
-            <p className="text-xs text-slate-400">Sales Manager</p>
-          </div>
+      {isOpen && <button type="button" aria-label="Close navigation overlay" onClick={() => setIsOpen(false)} className="lg:hidden fixed inset-0 z-40 bg-slate-950/50 backdrop-blur-sm" />}
+      <aside id="main-sidebar" className={`app-sidebar fixed inset-y-0 left-0 z-50 flex w-64 flex-col transition-transform duration-300 lg:translate-x-0 ${isOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="sidebar-brand">
+          <div className="sidebar-brand-mark"><BarChart3 size={22} /></div>
+          <div className="flex-1"><p className="text-sm font-semibold tracking-tight text-white">Sales Analytics</p><p className="mt-1 text-xs text-slate-400">Sales Manager</p></div>
+          <button type="button" onClick={() => setIsOpen(false)} className="lg:hidden text-slate-400 p-1" aria-label="Close navigation"><X size={20} /></button>
         </div>
-        <button
-          type="button"
-          onClick={() => setIsOpen(false)}
-          className="lg:hidden text-slate-300 hover:text-white"
-          aria-label="Close sidebar"
-        >
-          <X className="w-5 h-5" />
-        </button>
-      </div>
-
-      {/* Menu Section */}
-      <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
-        <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider px-3 py-2">
-          Navigation
-        </p>
-        {menuItems.map((item) => {
-          const Icon = item.icon
-          const isActive = activeMenu === item.id
-          const ItemComponent = item.href && item.href !== '#' ? Link : 'button'
-          const itemProps = item.href && item.href !== '#'
-            ? { to: item.href, onClick: () => setIsOpen(false) }
-            : { onClick: () => item.hasSubmenu && setExpandedReports(!expandedReports) }
-          return (
-            <div key={item.id}>
-              <ItemComponent
-                {...itemProps}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all duration-300 group relative overflow-hidden ${
-                  isActive
-                    ? 'bg-gradient-to-r from-blue-500 to-cyan-500 text-white shadow-lg shadow-blue-500/20'
-                    : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/50'
-                }`}
-              >
-                <Icon className={`w-5 h-5 transition-transform ${isActive ? 'scale-110' : ''}`} />
-                <span className="flex-1 text-left">{item.label}</span>
-                {isActive && (
-                  <div className="w-2 h-2 bg-white rounded-full animate-pulse" />
-                )}
-                {item.hasSubmenu && (
-                  <ChevronDown className={`w-4 h-4 transition-transform ${expandedReports ? 'rotate-180' : ''}`} />
-                )}
-              </ItemComponent>
-
-              {/* Report Sub-items */}
-              {item.hasSubmenu && expandedReports && (
-                <div className="ml-4 mt-1 space-y-1 border-l border-slate-700/30 pl-3">
-                  {reportSubItems.map((subItem) => (
-                    <Link
-                      key={subItem.id}
-                      to={subItem.href}
-                      onClick={() => setIsOpen(false)}
-                      className={`w-full flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all duration-200 block ${
-                        location.pathname === subItem.href
-                          ? 'bg-slate-700 text-white'
-                          : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/40'
-                      }`}
-                    >
-                      <span>{subItem.icon}</span>
-                      <span>{subItem.label}</span>
-                    </Link>
-                  ))}
-                </div>
-              )}
+        <nav aria-label="Main navigation" className="flex-1 min-h-0 overflow-y-auto scrollbar-hide px-3 py-6">
+          <p className="sidebar-section-label">Workspace</p>
+          <button type="button" className="sidebar-link"><LayoutDashboard size={18} /><span>Dashboard</span></button>
+          <button type="button" className="sidebar-link"><Users size={18} /><span>Teams Performance</span></button>
+          <button type="button" onClick={() => setExpandedReports(!expandedReports)} aria-expanded={expandedReports} aria-controls="report-navigation" className={`sidebar-link ${isReportsActive ? 'sidebar-parent-active' : ''}`}>
+            <FileText size={18} /><span className="flex-1 text-left">Reports</span><ChevronDown size={15} className={`transition-transform ${expandedReports ? 'rotate-180' : ''}`} />
+          </button>
+          {expandedReports && (
+            <div id="report-navigation" className="sidebar-report-list">
+              {reportItems.map(({ label, icon: Icon, href }) => (
+                <Link key={href} to={href} onClick={() => setIsOpen(false)} aria-current={pathname === href ? 'page' : undefined} className={`sidebar-report-link ${pathname === href ? 'sidebar-report-active' : ''}`}>
+                  <Icon size={16} strokeWidth={1.7} /><span>{label}</span>
+                </Link>
+              ))}
             </div>
-          )
-        })}
-      </nav>
-
-      {/* Footer */}
-      <div className="p-4 space-y-2 border-t border-slate-800/50">
-        <button className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-slate-200 hover:bg-slate-800/50 transition-all group">
-          <Settings className="w-5 h-5 group-hover:rotate-90 transition-transform duration-300" />
-          <span className="text-sm font-semibold">Settings</span>
-        </button>
-        <button
-          onClick={handleLogout}
-          className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:text-rose-400 hover:bg-rose-900/10 transition-all"
-        >
-          <LogOut className="w-5 h-5" />
-          <span className="text-sm font-semibold">Logout</span>
-        </button>
-      </div>
-    </div>
+          )}
+          <Link to="/users" onClick={() => setIsOpen(false)} aria-current={pathname === '/users' ? 'page' : undefined} className={`sidebar-link ${pathname === '/users' ? 'sidebar-parent-active' : ''}`}><Users size={18} /><span>Users</span></Link>
+          <button type="button" className="sidebar-link"><BarChart3 size={18} /><span>Analytics</span></button>
+        </nav>
+        <div className="sidebar-footer">
+          <button type="button" className="sidebar-link"><Settings size={18} /><span>Settings</span></button>
+          <button type="button" onClick={handleLogout} className="sidebar-link sidebar-logout"><LogOut size={18} /><span>Logout</span></button>
+        </div>
+      </aside>
     </>
   )
 }

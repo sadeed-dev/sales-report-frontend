@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { toPng } from 'html-to-image'
+import { renderReportPng } from '../../lib/reportImage'
 import {
   Phone,
   Users,
@@ -60,11 +60,8 @@ export default function LeadListDispositionReport() {
       // Let the off-screen export table finish laying out before capture.
       await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)))
 
-      const dataUrl = await toPng(node, {
-        pixelRatio: 2,
-        backgroundColor: '#ffffff',
-        cacheBust: true,
-      })
+      const image = await renderReportPng(node)
+      const dataUrl = URL.createObjectURL(image)
 
       const link = document.createElement('a')
       link.download = `lead-list-disposition-report-${meta?.to_date || 'report'}.png`
@@ -72,6 +69,7 @@ export default function LeadListDispositionReport() {
       document.body.appendChild(link)
       link.click()
       document.body.removeChild(link)
+      setTimeout(() => URL.revokeObjectURL(dataUrl), 1000)
     } catch (err) {
       console.error('Report image export failed:', err)
       alert('Failed to generate the report image. Please try again.')

@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useMemo, useRef, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import {
   Search,
   RefreshCcw,
@@ -21,6 +21,7 @@ import {
   X,
 } from 'lucide-react'
 import reportAPI from '@/lib/api/reports'
+import CallActivityReports from '../../components/reports/CallActivityReports'
 
 
 
@@ -205,25 +206,8 @@ export default  function UsersModule() {
   const [error, setError] = useState(null)
   const [currentEmployeePage, setCurrentEmployeePage] = useState(1)
   const [currentAttendancePage, setCurrentAttendancePage] = useState(1)
-  const [showExportMenu, setShowExportMenu] = useState(false)
-  const exportMenuRef = useRef(null)
-
-  const [exporting, setExporting] = useState(false)
-  const [exportingAbsentUsers, setExportingAbsentUsers] = useState(false)
-  const [exportingAbsentUsersBranchwise, setExportingAbsentUsersBranchwise] = useState(false)
-  const [exportingAbsentUsersDepartmentwise, setExportingAbsentUsersDepartmentwise] = useState(false)
 
   const ITEMS_PER_PAGE = 10
-
-  useEffect(() => {
-    function handleClickOutside(event) {
-      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target)) {
-        setShowExportMenu(false)
-      }
-    }
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
 
   const branchOptions = useMemo(() => {
     const values = new Set()
@@ -349,110 +333,6 @@ export default  function UsersModule() {
       setLoading(false)
     }
   }
-  async function exportLateArrivalImages() {
-    setExporting(true)
-    setError(null)
-    try {
-      const response = await reportAPI.getLateArrivalImages({ from: fromDate, to: toDate })
-
-      // Create blob from response
-      const blob = new Blob([response.data], { type: 'application/zip' })
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `late-users-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (err) {
-      setError('Unable to export late arrival images. Please try again.')
-    } finally {
-      setExporting(false)
-    }
-  }
-
-  async function exportAbsentUsersAllBranches() {
-    setExportingAbsentUsers(true)
-    setError(null)
-    try {
-      const response = await reportAPI.getAbsentUsersImages({ from: fromDate, to: toDate })
-
-      // Create blob from response
-      const blob = new Blob([response.data], { type: 'application/zip' })
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `absent-users-all-branches-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (err) {
-      setError('Unable to export absent users images. Please try again.')
-    } finally {
-      setExportingAbsentUsers(false)
-    }
-  }
-
-  async function exportAbsentUsersBranchwise() {
-    setExportingAbsentUsersBranchwise(true)
-    setError(null)
-    try {
-      const response = await reportAPI.getAbsentUsersBranchwiseImages({ from: fromDate, to: toDate })
-
-      // Create blob from response
-      const blob = new Blob([response.data], { type: 'application/zip' })
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `absent-users-branchwise-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (err) {
-      setError('Unable to export branch-wise absent users images. Please try again.')
-    } finally {
-      setExportingAbsentUsersBranchwise(false)
-    }
-  }
-
-  async function exportAbsentUsersDepartmentwise() {
-    setExportingAbsentUsersDepartmentwise(true)
-    setError(null)
-    try {
-      const response = await reportAPI.getAbsentUsersDepartmentwiseImages({ from: fromDate, to: toDate })
-
-      const blob = new Blob([response.data], { type: 'application/zip' })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `absent-users-departmentwise-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
-    } catch (err) {
-      setError('Unable to export department-wise absent users images. Please try again.')
-    } finally {
-      setExportingAbsentUsersDepartmentwise(false)
-    }
-  }
-
-
   function exportToCSV(data, filename) {
     if (!data || data.length === 0) {
       alert('No data to export')
@@ -518,47 +398,6 @@ export default  function UsersModule() {
       loadAttendance()
     }
   }, [activeTab, fromDate, toDate])
-
-  const bulkExportOptions = [
-    {
-      key: 'late',
-      label: 'Late Arrivals',
-      description: 'Photo pack of late check-ins',
-      icon: Clock,
-      tone: 'text-red-600 bg-red-50',
-      onClick: exportLateArrivalImages,
-      loading: exporting,
-    },
-    {
-      key: 'absent',
-      label: 'Absent Users',
-      description: 'All branches, single pack',
-      icon: Users,
-      tone: 'text-orange-600 bg-orange-50',
-      onClick: exportAbsentUsersAllBranches,
-      loading: exportingAbsentUsers,
-    },
-    {
-      key: 'absent-branch',
-      label: 'Absent (Branch-wise)',
-      description: 'Grouped by branch',
-      icon: MapPin,
-      tone: 'text-amber-600 bg-amber-50',
-      onClick: exportAbsentUsersBranchwise,
-      loading: exportingAbsentUsersBranchwise,
-    },
-    {
-      key: 'absent-department',
-      label: 'Absent (Department-wise)',
-      description: 'Grouped by department',
-      icon: Building2,
-      tone: 'text-yellow-600 bg-yellow-50',
-      onClick: exportAbsentUsersDepartmentwise,
-      loading: exportingAbsentUsersDepartmentwise,
-    },
-  ]
-
-  const isBulkExporting = exporting || exportingAbsentUsers || exportingAbsentUsersBranchwise || exportingAbsentUsersDepartmentwise
 
   return (
     <div className="space-y-6">
@@ -710,51 +549,8 @@ export default  function UsersModule() {
 
           {/* Right Actions */}
           <div className="flex flex-wrap items-center gap-2">
-            {activeTab === 'attendance' && (
-              <div className="relative" ref={exportMenuRef}>
-                <button
-                  onClick={() => setShowExportMenu((open) => !open)}
-                  disabled={isBulkExporting}
-                  className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-3.5 py-2.5 text-xs font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  {isBulkExporting ? 'Exporting…' : 'Bulk Exports'}
-                  <ChevronDown className={`h-3.5 w-3.5 transition-transform ${showExportMenu ? 'rotate-180' : ''}`} />
-                </button>
+            {activeTab === 'attendance' && <CallActivityReports fromDate={fromDate} toDate={toDate} />}
 
-                {showExportMenu && (
-                  <div className="absolute right-0 z-20 mt-2 w-72 overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-xl shadow-slate-900/10">
-                    <div className="border-b border-slate-100 px-4 py-2.5">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">Image Packs</p>
-                    </div>
-                    {bulkExportOptions.map((option) => {
-                      const Icon = option.icon
-                      return (
-                        <button
-                          key={option.key}
-                          onClick={() => {
-                            option.onClick()
-                            setShowExportMenu(false)
-                          }}
-                          disabled={option.loading}
-                          className="flex w-full items-center gap-3 px-4 py-3 text-left transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
-                        >
-                          <span className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg ${option.tone}`}>
-                            <Icon className="h-4 w-4" />
-                          </span>
-                          <span className="min-w-0">
-                            <span className="block text-sm font-semibold text-slate-800">
-                              {option.loading ? 'Preparing…' : option.label}
-                            </span>
-                            <span className="block truncate text-xs text-slate-400">{option.description}</span>
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                )}
-              </div>
-            )}
 
             <button
               onClick={() => {

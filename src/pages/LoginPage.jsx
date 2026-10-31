@@ -13,7 +13,7 @@ export default function LoginPage() {
     e.preventDefault()
     const result = await login(email, password)
     if (result.success) {
-      navigate('/tata')
+      navigate('/combined')
     }
   }
 

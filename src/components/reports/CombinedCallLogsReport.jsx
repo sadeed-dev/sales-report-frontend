@@ -1,25 +1,41 @@
 import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { useCombinedCallLogs } from '../../hooks/useCallLogs'
-import { ChevronUp, ChevronDown, Download, Loader2 } from 'lucide-react'
+import reportAPI from '../../lib/api/reports'
+import CallActivityTable from './CallActivityTable'
+import { ChevronUp, ChevronDown, Loader2, SlidersHorizontal, FileSpreadsheet, Image, Layers } from 'lucide-react'
 
 export default function CombinedCallLogsReport() {
   const [sortConfig, setSortConfig] = useState({ key: 'id', direction: 'asc' })
-  const [params, setParams] = useState(undefined)
-  const [fromDate, setFromDate] = useState('')
-  const [toDate, setToDate] = useState('')
+  const [today] = useState(() => new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10))
+  const [params, setParams] = useState(() => ({ from_date: today, to_date: today }))
+  const [fromDate, setFromDate] = useState(today)
+  const [toDate, setToDate] = useState(today)
   const [selectedBranch, setSelectedBranch] = useState('all')
   const [selectedDepartment, setSelectedDepartment] = useState('all')
   const [isExportingExcel, setIsExportingExcel] = useState(false)
   const [isExportingImage, setIsExportingImage] = useState(false)
 const apiUrl = import.meta.env.VITE_API_BASE_URL;
-console.log(apiUrl);
+  const isSalesmanInterest = params?.report === 'salesman-interest';
+  const isCallActivity = selectedDepartment === 'call-activity'
+  const [activityParams, setActivityParams] = useState(() => ({ from: today, to: today }))
+  const activityQuery = useQuery({
+    queryKey: ['call-activity-report', activityParams.from, activityParams.to],
+    queryFn: () => reportAPI.getDailyPresentData({ from: activityParams.from, to: activityParams.to }),
+    enabled: isCallActivity,
+    retry: false,
+  })
+  const activityRows = activityQuery.data?.data?.summary || []
+  const visibleActivityRows = activityParams.branch ? activityRows.filter((row) => row.branch === activityParams.branch) : activityRows
 
 
-    const { data, isLoading, error } = useCombinedCallLogs(params)
+    const { data, isLoading, error } = useCombinedCallLogs(params, { enabled: !isCallActivity })
 // Loader overlay when API is loading
 const callLogs = (data?.data?.summary || []).map((row) => ({
   ...row,
   total_calls: Number(row.total_calls) || 0,
+  total_interested: Number(row.total_interested) || 0,
+  total_interested_pct: Number(row.total_interested_pct) || 0,
   connected_calls: Number(row.connected_calls) || 0,
   not_connected_calls: Number(row.not_connected_calls) || 0,
   dialshree_talk_time_sec: Number(row.dialshree_talk_time_sec ?? row.tata_talk_time_sec) || 0,
@@ -32,7 +48,7 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
   avg_talk_time: row.avg_talk_time || "00:00:00",
 }))
 
-  const branches = ['all', ...new Set(callLogs.map((row) => row.branch).filter(Boolean))]
+  const branches = ['all', ...new Set((isCallActivity ? activityRows : callLogs).map((row) => row.branch).filter(Boolean)), ...(isCallActivity && selectedBranch !== 'all' && !activityRows.some((row) => row.branch === selectedBranch) ? [selectedBranch] : [])]
 
   const filteredData =
     (params && params.branch) ? callLogs : (selectedBranch === 'all' ? callLogs : callLogs.filter((row) => row.branch === selectedBranch))
@@ -45,20 +61,65 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
     }
 
     const handleApplyFilters = () => {
+      if (isCallActivity) {
+        const today = new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10)
+        const nextParams = { from: fromDate || today, to: toDate || today }
+        if (nextParams.from > nextParams.to) return alert('From date must be on or before to date.')
+        if (selectedBranch !== 'all') nextParams.branch = selectedBranch
+        setActivityParams(nextParams)
+        return
+      }
       const newParams = {}
       if (fromDate) newParams.from_date = fromDate
       if (toDate) newParams.to_date = toDate
       if (selectedBranch && selectedBranch !== 'all') newParams.branch = selectedBranch
-      if (selectedDepartment !== 'all') newParams.department = selectedDepartment
+      if (selectedDepartment === 'salesman-interest') {
+        newParams.report = 'salesman-interest'
+        setSortConfig({ key: 'total_interested', direction: 'desc' })
+      }
+      else if (selectedDepartment !== 'all') newParams.department = selectedDepartment
       setParams(Object.keys(newParams).length > 0 ? newParams : undefined)
+    }
+
+    const exportCallActivity = async (format) => {
+      const today = new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10)
+      const from = fromDate || today
+      const to = toDate || today
+      if (from > to) {
+        alert('From date must be on or before to date.')
+        return
+      }
+      const setExporting = format === 'image' ? setIsExportingImage : setIsExportingExcel
+      setExporting(true)
+      try {
+        const response = await reportAPI.getDailyPresentReport({ from, to, format, ...(selectedBranch !== 'all' ? { branch: selectedBranch } : {}) })
+        const url = window.URL.createObjectURL(response.data)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = `daily present.${format === 'xlsx' ? 'xlsx' : 'zip'}`
+        document.body.appendChild(link)
+        link.click()
+        document.body.removeChild(link)
+        window.URL.revokeObjectURL(url)
+      } catch (err) {
+        let message = 'Unable to export the call activity report. Please try again.'
+        if (err.response?.data instanceof Blob) {
+          try { message = JSON.parse(await err.response.data.text()).message || message } catch { /* Use fallback message. */ }
+        }
+        alert(message)
+      } finally {
+        setExporting(false)
+      }
     }
 
     // /api/v1/reports/combined/call-logs
     const handleExportImage = async () => {
+      if (isCallActivity) return exportCallActivity('image')
       setIsExportingImage(true)
       try {
         let url = `${apiUrl}/reports/combined/call-logs?format=image`
-        if (selectedDepartment !== 'all') url += `&department=${selectedDepartment}`
+        if (selectedDepartment === 'salesman-interest') url += '&report=salesman-interest'
+        else if (selectedDepartment !== 'all') url += `&department=${selectedDepartment}`
         if (fromDate) url += `&from_date=${fromDate}`
         if (toDate) url += `&to_date=${toDate}`
         if (selectedBranch && selectedBranch !== 'all') url += `&branch=${encodeURIComponent(selectedBranch)}`
@@ -87,10 +148,12 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
     }
 
     const handleExportExcel = async () => {
+      if (isCallActivity) return exportCallActivity('xlsx')
       setIsExportingExcel(true)
       try {
         let url = `${apiUrl}/reports/combined/call-logs?format=xlsx`
-        if (selectedDepartment !== 'all') url += `&department=${selectedDepartment}`
+        if (selectedDepartment === 'salesman-interest') url += '&report=salesman-interest'
+        else if (selectedDepartment !== 'all') url += `&department=${selectedDepartment}`
         if (fromDate) url += `&from_date=${fromDate}`
         if (toDate) url += `&to_date=${toDate}`
         if (selectedBranch && selectedBranch !== 'all') url += `&branch=${encodeURIComponent(selectedBranch)}`
@@ -135,10 +198,10 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
 })
   const SortHeader = ({ label, sortKey }) => (
     <th
-      onClick={() => handleSort(sortKey)}
-      className="px-6 py-4 text-left text-sm font-bold text-slate-900 bg-gradient-to-r from-slate-50 to-blue-50/30 cursor-pointer hover:bg-blue-50 transition-all"
+      aria-sort={sortConfig.key === sortKey ? (sortConfig.direction === 'asc' ? 'ascending' : 'descending') : 'none'}
+      className="report-sort-header"
     >
-      <div className="flex items-center gap-2">
+      <button type="button" onClick={() => handleSort(sortKey)} className="flex w-full items-center gap-2 text-left">
         {label}
         {sortConfig.key === sortKey && (
           sortConfig.direction === 'desc' ? (
@@ -147,11 +210,11 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
             <ChevronUp className="w-4 h-4 text-blue-600" />
           )
         )}
-      </div>
+      </button>
     </th>
   )
 
-  if (isLoading) {
+  if (!isCallActivity && isLoading) {
     return (
       <div className="flex justify-center items-center py-10">
         <Loader2 className="w-10 h-10 text-blue-500 animate-spin" />
@@ -160,115 +223,112 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
     )
   }
 
-  if (error) {
+  if (!isCallActivity && error) {
     return (
       <div className="text-red-600 p-6">Error loading combined call logs: {error.message}</div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300">
-      {/* Sticky Filter Bar */}
-      <div className="sticky top-0 z-20 px-6 py-4 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-slate-200 shadow-sm">
-        <div className="flex flex-wrap items-center gap-4">
-          <div className="flex items-center gap-2">
-            <label htmlFor="talktime-department" className="text-sm font-semibold text-slate-700">Report:</label>
-            <select
-              id="talktime-department"
-              value={selectedDepartment}
-              onChange={(event) => setSelectedDepartment(event.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            >
+    <div className="report-panel">
+      <div className="report-toolbar">
+        <div className="report-toolbar-title">
+          <span className="report-icon"><Layers size={19} /></span>
+          <div><h2>Call logs overview</h2><p>Choose a report and refine your view.</p></div>
+        </div>
+        <div className="report-export-actions" aria-label="Export report">
+          <button type="button" onClick={handleExportExcel} disabled={isExportingExcel || isExportingImage} className="report-button report-button-secondary">
+            {isExportingExcel ? <Loader2 size={16} className="animate-spin" /> : <FileSpreadsheet size={16} />}
+            {isExportingExcel ? 'Exporting...' : 'Export Excel'}
+          </button>
+          <button type="button" onClick={handleExportImage} disabled={isExportingExcel || isExportingImage} className="report-button report-button-secondary">
+            {isExportingImage ? <Loader2 size={16} className="animate-spin" /> : <Image size={16} />}
+            {isExportingImage ? 'Exporting...' : 'Export Image'}
+          </button>
+        </div>
+      </div>
+      <div className="report-filters">
+        <div className="report-field report-type-field">
+          <label htmlFor="talktime-department">Report type</label>
+          <div className="report-select-wrap">
+            <select id="talktime-department" value={selectedDepartment} onChange={(event) => {
+              const value = event.target.value
+              setSelectedDepartment(value)
+              if (value === 'call-activity') {
+                const today = new Date(Date.now() + 330 * 60000).toISOString().slice(0, 10)
+                const from = fromDate || today
+                const to = toDate || today
+                setFromDate(from)
+                setToDate(to)
+                setActivityParams({ from, to })
+                setSelectedBranch('all')
+              }
+            }}>
               <option value="all">Combined Call Logs</option>
+              <option value="call-activity">Call activity report</option>
+              <option value="salesman-interest">Salesman Interested + 300 Sec Report</option>
               <option value="hr-operations">HR + Operations Talktime Reports</option>
               <option value="hr">HR Talktime Report</option>
               <option value="operations">Operations Talktime Report</option>
             </select>
+            <ChevronDown size={16} aria-hidden="true" />
           </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-semibold text-slate-700">From Date:</label>
-            <input
-              type="date"
-              value={fromDate}
-              onChange={(e) => setFromDate(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-semibold text-slate-700">To Date:</label>
-            <input
-              type="date"
-              value={toDate}
-              onChange={(e) => setToDate(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <label className="text-sm font-semibold text-slate-700">Branch:</label>
-            <select
-              value={selectedBranch}
-              onChange={(e) => setSelectedBranch(e.target.value)}
-              className="px-3 py-2 border border-slate-300 rounded-lg text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
-            >
-              {branches.map((branch) => (
-                <option key={branch} value={branch}>
-                  {branch}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            onClick={handleApplyFilters}
-            className="px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg text-sm font-semibold transition-colors">
-            Apply Filters
-          </button>
-          <button
-            onClick={handleExportExcel}
-            disabled={isExportingExcel || isExportingImage}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition ${
-              isExportingExcel
-                ? 'bg-green-400 text-white cursor-not-allowed opacity-75'
-                : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
-          >
-            {isExportingExcel ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Export Excel
-              </>
-            )}
-          </button>
-          <button
-            onClick={handleExportImage}
-            disabled={isExportingExcel || isExportingImage}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition ${
-              isExportingImage
-                ? 'bg-emerald-400 text-white cursor-not-allowed opacity-75'
-                : 'bg-emerald-600 text-white hover:bg-emerald-700'
-            }`}
-          >
-            {isExportingImage ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Export Image
-              </>
-            )}
-          </button>
         </div>
+        <div className="report-field">
+          <label htmlFor="combined-from-date">From date</label>
+          <input id="combined-from-date" type="date" value={fromDate} onChange={(event) => setFromDate(event.target.value)} />
+        </div>
+        <div className="report-field">
+          <label htmlFor="combined-to-date">To date</label>
+          <input id="combined-to-date" type="date" value={toDate} onChange={(event) => setToDate(event.target.value)} />
+        </div>
+        <div className="report-field">
+          <label htmlFor="combined-branch">Branch</label>
+          <div className="report-select-wrap">
+            <select id="combined-branch" value={selectedBranch} onChange={(event) => setSelectedBranch(event.target.value)}>
+              {branches.map((branch) => <option key={branch} value={branch}>{branch === 'all' ? 'All branches' : branch}</option>)}
+            </select>
+            <ChevronDown size={16} aria-hidden="true" />
+          </div>
+        </div>
+        <button type="button" onClick={handleApplyFilters} className="report-button report-button-primary report-apply"><SlidersHorizontal size={16} />Apply filters</button>
+      </div>
+      {isCallActivity ? (
+        <CallActivityTable rows={visibleActivityRows} isLoading={activityQuery.isFetching} error={activityQuery.error} warning={activityQuery.data?.data?.metadata?.warning} />
+      ) : (
+      <>
+      <div className="report-results-heading">
+        <div className="flex flex-wrap items-center gap-2"><h3>Report results</h3><span className="report-count">{sortedData.length} records</span></div>
+        <p>Click a column heading to sort</p>
       </div>
 
-      <div className="overflow-x-auto scrollbar-hide">
-<table className="w-full">
+      <div className="report-table-scroll" role="region" aria-label="Call activity results" tabIndex={0}>
+{isSalesmanInterest ? (
+          <table className="report-data-table">
+            <thead><tr className="border-b border-slate-200">
+              <SortHeader label="S.R." sortKey="sr_no" />
+              <SortHeader label="Salesman" sortKey="user_name" />
+              <SortHeader label="Total Calls" sortKey="total_calls" />
+              <SortHeader label="Total Interested + 300 Sec" sortKey="total_interested" />
+              <SortHeader label="Total Duration" sortKey="total_talk_time_sec" />
+              <SortHeader label="Total Interested %" sortKey="total_interested_pct" />
+              <SortHeader label="Source" sortKey="source" />
+            </tr></thead>
+            <tbody>
+              {sortedData.map((row, index) => (
+                <tr key={row.sr_no || index} className="border-b border-slate-100 odd:bg-white even:bg-slate-50/50">
+                  {[row.sr_no, row.user_name, row.total_calls, row.total_interested,
+                    row.total_talk_time, `${row.total_interested_pct.toFixed(2)}%`,
+                    row.source || '-'].map((value, column) => (
+                    <td key={column} className="px-6 py-4 text-sm text-slate-900">{value}</td>
+                  ))}
+                </tr>
+              ))}
+              {sortedData.length === 0 && <tr><td colSpan={7} className="p-6 text-center text-slate-500">No calls found for these filters.</td></tr>}
+            </tbody>
+          </table>
+        ) : (
+<table className="report-data-table">
   <thead>
     <tr className="border-b border-slate-200 bg-gradient-to-r from-slate-50 to-blue-50/30">
       <SortHeader label="S.R." sortKey="sr_no" />
@@ -359,57 +419,18 @@ const callLogs = (data?.data?.summary || []).map((row) => ({
         </tr>
       );
     })}
+    {sortedData.length === 0 && <tr><td colSpan={11} className="p-12 text-center text-sm text-slate-500">No calls found for these filters.</td></tr>}
   </tbody>
 </table>
+        )}
       </div>
       
-      <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-between">
-        <span className="text-sm text-slate-600">{sortedData.length} row(s) total.</span>
-        <div className="flex gap-2">
-          <button
-            onClick={handleExportExcel}
-            disabled={isExportingExcel || isExportingImage}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition ${
-              isExportingExcel
-                ? 'bg-green-400 text-white cursor-not-allowed opacity-75'
-                : 'bg-green-600 text-white hover:bg-green-700'
-            }`}
-          >
-            {isExportingExcel ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Export Excel
-              </>
-            )}
-          </button>
-          <button
-            onClick={handleExportImage}
-            disabled={isExportingExcel || isExportingImage}
-            className={`px-4 py-2 rounded-lg text-sm font-semibold flex items-center gap-2 transition ${
-              isExportingImage
-                ? 'bg-emerald-400 text-white cursor-not-allowed opacity-75'
-                : 'bg-emerald-600 text-white hover:bg-emerald-700'
-            }`}
-          >
-            {isExportingImage ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                Exporting...
-              </>
-            ) : (
-              <>
-                <Download className="w-4 h-4" />
-                Export Image
-              </>
-            )}
-          </button>
-        </div>
+      <div className="report-table-footer">
+        <span>{sortedData.length} {sortedData.length === 1 ? 'record' : 'records'} shown</span>
+        {!isSalesmanInterest && <span className="report-legend"><span aria-hidden="true" /> Highlighted rows: talk time under 1 hour</span>}
       </div>
+      </>
+      )}
     </div>
   )
 }

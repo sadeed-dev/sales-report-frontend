@@ -1,6 +1,7 @@
 import apiClient from './client';
 
 export interface CallLogsParams {
+  report?: 'salesman-interest';
   format?: 'json' | 'xlsx' | 'image' | 'images' | 'png';
   from_date?: string;
   to_date?: string;
@@ -72,6 +73,11 @@ export interface CallLogsResponse {
 }
 
 export interface CallLogEntry {
+  department?: string | null;
+  interested_calls?: number;
+  sec_300_plus_calls?: number;
+  total_interested?: number;
+  total_interested_pct?: number;
   sr_no: number;
   source: string;
   user_name: string;
@@ -174,6 +180,10 @@ export interface LeadListDispositionResponse {
 
 // Reports API endpoints
 const reportAPI = {
+  getCampaignDispositionReport: async (params?: LeadListReportParams) => {
+    const response = await apiClient.get('/reports/dispositions/campaigns', { params, timeout: 90000 });
+    return response.data;
+  },
   // Get Lead List Performance & Disposition Report
   getLeadListDispositionReport: async (params?: LeadListReportParams) => {
     const response = await apiClient.get<LeadListDispositionResponse>(
@@ -251,6 +261,23 @@ const reportAPI = {
       params,
     });
     return response.data;
+  },
+
+  // Daily present report: branch/day images or an Excel workbook.
+  getDailyPresentData: async (params: { from: string; to: string }) => {
+    const response = await apiClient.get('/reports/attendance/daily-present', {
+      params: { ...params, format: 'json' },
+      timeout: 180000,
+    });
+    return response.data;
+  },
+
+  getDailyPresentReport: async (params: { from: string; to: string; format: 'image' | 'xlsx'; branch?: string }) => {
+    return apiClient.get('/reports/attendance/daily-present', {
+      params,
+      responseType: 'blob',
+      timeout: 180000,
+    });
   },
 
   // Get late arrival images (after 9:30 AM)

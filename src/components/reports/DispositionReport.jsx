@@ -51,7 +51,7 @@ export default function DispositionReport() {
   )
 
   return (
-    <div className="bg-white rounded-xl overflow-hidden shadow-sm border border-slate-200 hover:shadow-lg transition-all duration-300">
+    <div className="report-panel report-standard-panel">
       {/* Sticky Filter Bar */}
       <div className="sticky top-0 z-20 px-6 py-4 bg-gradient-to-r from-blue-50 to-slate-50 border-b border-slate-200 shadow-sm">
         <div className="flex flex-wrap items-center gap-4">

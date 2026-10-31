@@ -157,7 +157,7 @@ export default function VICallLogsReport() {
   return  (
   <div className="space-y-6">
     {/* STICKY HEADER & FILTERS */}
-    <div className="sticky top-0 z-20 bg-white border-b border-slate-200 shadow-sm rounded-t-2xl p-4">
+    <div className="report-panel p-5 md:p-6">
       <div className="flex justify-between items-center flex-wrap gap-4">
         <div>
           <h2 className="text-2xl font-bold text-slate-800">VI Call Logs</h2>
@@ -246,9 +246,9 @@ export default function VICallLogsReport() {
     </div>
 
     {/* TABLE CARD */}
-    <div className="bg-white rounded-2xl shadow border border-slate-200 overflow-hidden">
-      <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+    <div className="report-panel">
+      <div className="report-table-scroll" role="region" aria-label="VI call results" tabIndex={0}>
+        <table className="report-data-table">
           
           {/* HEADER */}
           <thead className="bg-gradient-to-r from-slate-50 to-blue-50 sticky top-0 z-10">
