@@ -285,6 +285,7 @@ const reportAPI = {
     const response = await apiClient.get<any>('/reports/attendance/late-arrivals', {
       params,
       responseType: 'blob',
+      timeout: 180000,
     });
     return response;
   },
@@ -294,6 +295,7 @@ const reportAPI = {
     const response = await apiClient.get<any>('/reports/attendance/absent-users', {
       params,
       responseType: 'blob',
+      timeout: 180000,
     });
     return response;
   },
@@ -303,6 +305,7 @@ const reportAPI = {
     const response = await apiClient.get<any>('/reports/attendance/absent-users-branchwise', {
       params,
       responseType: 'blob',
+      timeout: 180000,
     });
     return response;
   },
@@ -312,7 +315,7 @@ const reportAPI = {
     const response = await apiClient.get<any>('/reports/attendance/absent-users-departmentwise', {
       params,
       responseType: 'blob',
-      timeout: 120000,
+      timeout: 180000,
     });
     return response;
   },

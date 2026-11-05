@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { CalendarDays, FileText, Clock, Users, MapPin, Building2, Download, ChevronDown, Loader2 } from 'lucide-react'
 import reportAPI from '../../lib/api/reports'
+import { downloadReportZip, reportDownloadError } from '../../lib/reportDownload'
 
 export default function CallActivityReports({ fromDate, toDate }) {
   const [error, setError] = useState(null)
@@ -29,23 +30,9 @@ export default function CallActivityReports({ fromDate, toDate }) {
     setError(null)
     try {
       const response = await reportAPI.getLateArrivalImages({ from: fromDate, to: toDate })
-
-      // Create blob from response
-      const blob = new Blob([response.data], { type: 'application/zip' })
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `late-users-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      await downloadReportZip(response, `late-users-${fromDate}-to-${toDate}.zip`)
     } catch (err) {
-      setError('Unable to export late arrival images. Please try again.')
+      setError(await reportDownloadError(err, 'Unable to export late arrival images. Please try again.'))
     } finally {
       setExporting(false)
     }
@@ -80,23 +67,9 @@ export default function CallActivityReports({ fromDate, toDate }) {
     setError(null)
     try {
       const response = await reportAPI.getAbsentUsersImages({ from: fromDate, to: toDate })
-
-      // Create blob from response
-      const blob = new Blob([response.data], { type: 'application/zip' })
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `absent-users-all-branches-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      await downloadReportZip(response, `absent-users-all-branches-${fromDate}-to-${toDate}.zip`)
     } catch (err) {
-      setError('Unable to export absent users images. Please try again.')
+      setError(await reportDownloadError(err, 'Unable to export absent users images. Please try again.'))
     } finally {
       setExportingAbsentUsers(false)
     }
@@ -107,23 +80,9 @@ export default function CallActivityReports({ fromDate, toDate }) {
     setError(null)
     try {
       const response = await reportAPI.getAbsentUsersBranchwiseImages({ from: fromDate, to: toDate })
-
-      // Create blob from response
-      const blob = new Blob([response.data], { type: 'application/zip' })
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `absent-users-branchwise-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-
-      // Cleanup
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      await downloadReportZip(response, `absent-users-branchwise-${fromDate}-to-${toDate}.zip`)
     } catch (err) {
-      setError('Unable to export branch-wise absent users images. Please try again.')
+      setError(await reportDownloadError(err, 'Unable to export branch-wise absent users images. Please try again.'))
     } finally {
       setExportingAbsentUsersBranchwise(false)
     }
@@ -134,18 +93,9 @@ export default function CallActivityReports({ fromDate, toDate }) {
     setError(null)
     try {
       const response = await reportAPI.getAbsentUsersDepartmentwiseImages({ from: fromDate, to: toDate })
-
-      const blob = new Blob([response.data], { type: 'application/zip' })
-      const url = window.URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      link.download = `absent-users-departmentwise-${fromDate}-to-${toDate}.zip`
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      window.URL.revokeObjectURL(url)
+      await downloadReportZip(response, `absent-users-departmentwise-${fromDate}-to-${toDate}.zip`)
     } catch (err) {
-      setError('Unable to export department-wise absent users images. Please try again.')
+      setError(await reportDownloadError(err, 'Unable to export department-wise absent users images. Please try again.'))
     } finally {
       setExportingAbsentUsersDepartmentwise(false)
     }
